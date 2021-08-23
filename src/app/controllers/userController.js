@@ -5,18 +5,32 @@ const bcrypt = require('bcrypt');
 class UserController {
 
     async post(req, res) {
-
-        await users.create(req.body, (err, data) => {
-            if (err) {
+        const {email, passWord} = req.body;
+        if(!email || !passWord){return res.status(412).json({error: "Dados insuficientes!"})}
+        await users.findOne({email}, (err, data) => {
+            if(err){
                 return res.status(400).json(err);
             }
-            else if (!data) {
-                return res.status(200).json({ error: "O usuário não foi criado" });
+            else if(data){
+                return res.status(200).json({error: "Este email ja foi cadastrado"});
             }
-            else {
-                return res.status(200).json(data);
+            else{
+
+                users.create({email, passWord}, (err, data) => {
+                    if (err) {
+                        return res.status(400).json(err);
+                    }
+                    else if (!data) {
+                        return res.status(200).json({ error: "O usuário não foi criado" });
+                    }
+                    else {
+                        return res.status(200).json(data);
+                    }
+                });
             }
         });
+
+        
     }
 
     async get(req, res) {
@@ -35,7 +49,7 @@ class UserController {
     }
 
     async findOne(req, res) {
-        const { _id } = req.query;
+        const { _id } = req.params;
 
         await users.findOne({ _id }, (err, data) => {
             if (err) {

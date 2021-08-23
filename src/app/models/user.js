@@ -7,11 +7,11 @@ passWord: {type: String, require: true, select: false },
 createdAt: {type: Date, default: Date.now }
 });
 
-userSchema.pre('save', function (next) {
+userSchema.pre('save', async function (next) {
     let user = this;
     if(!user.isModified('passWord')) return next();
 
-    bcrypt.hash(user.passWord, 10, (err, encrypted) => {
+    await bcrypt.hash(user.passWord, 10, (err, encrypted) => {
         if(!err){
             user.passWord = encrypted;
             return next();
