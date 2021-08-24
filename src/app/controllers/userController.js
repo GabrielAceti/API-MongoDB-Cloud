@@ -1,8 +1,12 @@
-
+const jwt = require('jsonwebtoken');
 const users = require('../models/user');
 const bcrypt = require('bcrypt');
 
-class UserController {
+const createUserToken = (userId) => {
+    return jwt.sign({id: userId}, 'userapimongodb', {expiresIn: '24h'});
+}
+
+class UserController {   
 
     async post(req, res) {
         const {email, passWord} = req.body;
@@ -23,8 +27,8 @@ class UserController {
                     else if (!data) {
                         return res.status(200).json({ error: "O usuário não foi criado" });
                     }
-                    else {
-                        return res.status(200).json(data);
+                    else {                        
+                        return res.status(200).json({data, token: createUserToken(data._id)});
                     }
                 });
             }
@@ -82,8 +86,8 @@ class UserController {
                         return res.status(400).json({ error: "Senha incorreta!" });
                     }
                     else {
-                        data.passWord = undefined;
-                        return res.status(200).json(data);
+                        data.passWord = undefined;console.log(data._id);
+                        return res.status(200).json({data, token: createUserToken(data._id)});
                     }
                 });
             }
