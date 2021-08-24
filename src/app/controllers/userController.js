@@ -11,21 +11,22 @@ class UserController {
     async post(req, res) {
         const {email, passWord} = req.body;
         if(!email || !passWord){return res.status(412).json({error: "Dados insuficientes!"})}
+
         await users.findOne({email}, (err, data) => {
             if(err){
-                return res.status(400).json(err);
+                return res.status(500).json(err);
             }
             else if(data){
-                return res.status(200).json({error: "Este email ja foi cadastrado"});
+                return res.status(201).json({error: "Este email ja foi cadastrado"});
             }
             else{
 
                 users.create({email, passWord}, (err, data) => {
                     if (err) {
-                        return res.status(400).json(err);
+                        return res.status(500).json(err);
                     }
                     else if (!data) {
-                        return res.status(200).json({ error: "O usuário não foi criado" });
+                        return res.status(400).json({ error: "O usuário não foi criado" });
                     }
                     else {                        
                         return res.status(200).json({data, token: createUserToken(data._id)});
@@ -41,10 +42,10 @@ class UserController {
 
         await users.find({}, (err, data) => {
             if (err) {
-                return res.status(400).json(err);
+                return res.status(500).json(err);
             }
             else if (!data) {
-                return res.status(200).json({ error: "Usuário(s) não encontrado(s)!" });
+                return res.status(400).json({ error: "Usuário(s) não encontrado(s)!" });
             }
             else {
                 return res.status(200).json(data);
@@ -57,10 +58,10 @@ class UserController {
 
         await users.findOne({ _id }, (err, data) => {
             if (err) {
-                return res.status(400).json(err);
+                return res.status(500).json(err);
             }
             else if (!data) {
-                return res.status(200).json({ error: "Usuário não encontrado!" });
+                return res.status(400).json({ error: "Usuário não encontrado!" });
             }
             else {
                 return res.status(200).json(data);
@@ -75,15 +76,15 @@ class UserController {
 
         users.findOne({ email }, (err, data) => {
             if (err) {
-                return res.status(400).json(err);
+                return res.status(500).json(err);
             }
             else if (!data) {
-                return res.status(200).json({ error: "Usuário não registrado!" });
+                return res.status(400).json({ error: "Usuário não registrado!" });
             }
             else {
                 bcrypt.compare(passWord, data.passWord, (err, same) => {
                     if (!same) {
-                        return res.status(400).json({ error: "Senha incorreta!" });
+                        return res.status(401).json({ error: "Senha incorreta!" });
                     }
                     else {
                         data.passWord = undefined;console.log(data._id);
