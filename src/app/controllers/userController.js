@@ -1,46 +1,47 @@
 const jwt = require('jsonwebtoken');
 const users = require('../models/user');
 const bcrypt = require('bcrypt');
+const config = require('../../config/config');
 
 const createUserToken = (userId) => {
-    return jwt.sign({id: userId}, 'userapimongodb', {expiresIn: '24h'});
+    return jwt.sign({ id: userId }, config.jwt_pwd, { expiresIn: config.jwt_expiresIn });
 }
 
-class UserController {   
+class UserController {
 
-    async post(req, res) {
-        const {email, passWord} = req.body;
-        if(!email || !passWord){return res.status(412).json({error: "Dados insuficientes!"})}
+    post(req, res) {
+        const { email, passWord } = req.body;
+        if (!email || !passWord) { return res.status(412).json({ error: "Dados insuficientes!" }) }
 
-        await users.findOne({email}, (err, data) => {
-            if(err){
+        users.findOne({ email }, (err, data) => {
+            if (err) {
                 return res.status(500).json(err);
             }
-            else if(data){
-                return res.status(201).json({error: "Este email ja foi cadastrado"});
+            else if (data) {
+                return res.status(201).json({ error: "Este email ja foi cadastrado" });
             }
-            else{
+            else {
 
-                users.create({email, passWord}, (err, data) => {
+                users.create({ email, passWord }, (err, data) => {
                     if (err) {
                         return res.status(500).json(err);
                     }
                     else if (!data) {
                         return res.status(400).json({ error: "O usuário não foi criado" });
                     }
-                    else {                        
-                        return res.status(200).json({data, token: createUserToken(data._id)});
+                    else {
+                        return res.status(200).json({ data, token: createUserToken(data._id) });
                     }
                 });
             }
         });
 
-        
+
     }
 
-    async get(req, res) {
+    get(req, res) {
 
-        await users.find({}, (err, data) => {
+        users.find({}, (err, data) => {
             if (err) {
                 return res.status(500).json(err);
             }
@@ -53,10 +54,10 @@ class UserController {
         });
     }
 
-    async findOne(req, res) {
+    findOne(req, res) {
         const { _id } = req.params;
 
-        await users.findOne({ _id }, (err, data) => {
+        users.findOne({ _id }, (err, data) => {
             if (err) {
                 return res.status(500).json(err);
             }
@@ -69,7 +70,7 @@ class UserController {
         });
     }
 
-    async auth(req, res) {
+    auth(req, res) {
         const { email, passWord } = req.body;
 
         if (!email || !passWord) return res.send({ error: 'Dados insuficientes!' });
@@ -87,8 +88,8 @@ class UserController {
                         return res.status(401).json({ error: "Senha incorreta!" });
                     }
                     else {
-                        data.passWord = undefined;console.log(data._id);
-                        return res.status(200).json({data, token: createUserToken(data._id)});
+                        data.passWord = undefined; console.log(data._id);
+                        return res.status(200).json({ data, token: createUserToken(data._id) });
                     }
                 });
             }
