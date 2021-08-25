@@ -1,6 +1,6 @@
-//string de conexão == mongodb+srv://user_admin:<password>@clusterapi.9s8fm.mongodb.net/myFirstDatabase?retryWrites=true&w=majority
+const config = require('../config/config')
 const mongoose = require('mongoose');
-const url = 'mongodb+srv://user_admin:masterkey@clusterapi.9s8fm.mongodb.net/myFirstDatabase?retryWrites=true&w=majority';
+const url = config.bd_string;
 
 
     mongoose.connect(url, { reconnectTries: Number.MAX_VALUE, reconnectInterval: 500, poolSize: 5, useNewUrlParser: true });
